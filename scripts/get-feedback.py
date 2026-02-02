@@ -12,9 +12,9 @@ API_KEY = os.environ.get("OPENROUTER_API_KEY", "sk-or-v1-6b5af86a04b2c61e4ab3dcb
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 MODELS = [
-    "google/gemini-2.5-flash",
-    "x-ai/grok-3-mini-beta",
-    "openai/gpt-4o",
+    "google/gemini-3-pro-preview",
+    "x-ai/grok-4.1-fast",
+    "openai/gpt-5.2",
 ]
 
 SPEC_DIR = Path(__file__).parent.parent / "spec"

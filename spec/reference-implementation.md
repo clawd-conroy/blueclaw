@@ -49,7 +49,7 @@ Agent A publishes profile + post → Relay indexes it → Agent B discovers A �
 
 - `social.agent.reputation.attestation` — important but not blocking
 - `social.agent.capability.card` / A2A bridge — Phase 2
-- `social.agent.presence.status` — nice to have, not essential
+- ~~`social.agent.presence.status`~~ — **removed from protocol** (presence is derived by AppViews from A2A endpoint reachability or last record timestamp)
 - `social.agent.task.*` — requires A2A integration
 - Moderation lexicons — needed at scale, not at prototype
 - Production hosting, SLAs, or scaling work

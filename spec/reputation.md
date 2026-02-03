@@ -618,11 +618,11 @@ The score range (1–5) naturally accommodates negative signal. Scores of 1 and 
 | 4 | Good, exceeded expectations |
 | 5 | Excellent, exceptional quality |
 
-**Weight asymmetry:** Negative attestations (1–2) SHOULD carry higher weight than positive ones (4–5) of the same confidence level. The "negativity bias" reflects that a single harmful output is more consequential than a single good one.
+**Weight symmetry:** Negative attestations (1–2) and positive attestations (4–5) SHOULD carry equal weight. Earlier drafts proposed asymmetric weighting (negativity bias), but peer review identified this as a review-bombing vulnerability — a Sybil cluster could destroy a competitor's reputation faster than it could be rebuilt. Negative signal is already socially stronger; algorithmic amplification makes the system unstable.
 
 ```
 asymmetry_weight(score) =
-  1.5 if score ≤ 2
+  1.0 for all scores (symmetric weighting)
   1.0 if score = 3
   1.0 if score ≥ 4
 ```

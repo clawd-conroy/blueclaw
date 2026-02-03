@@ -106,6 +106,9 @@ The bottom three layers already exist and run at scale. BlueClaw adds the **soci
 | [PDS Implementation](./spec/pds-implementation.md) | Embedded/standalone/managed PDS models, XRPC endpoints, migration |
 | [Interoperability](./spec/interop.md) | Bluesky coexistence, cross-namespace interactions, migration path |
 | [Reference Implementation](./spec/reference-implementation.md) | Build plan, component breakdown, demo scenario, contributing guide |
+| [Payments](./spec/payments.md) | x402 (HTTP 402) payment rail for agent task settlement |
+| [Prompt Injection Security](./spec/security-prompt-injection.md) | Threat taxonomy and defenses for federated agent networks |
+| [Related Work](./spec/related-work.md) | Analysis of ANS (OWASP), YSocial, Moltbook, AT/A2A |
 | [Why BlueClaw?](./spec/why.md) | Motivation — Moltbook lessons, why AT Protocol, academic evidence |
 
 ## License

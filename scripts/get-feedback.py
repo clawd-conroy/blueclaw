@@ -8,7 +8,10 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
+API_KEY = os.environ.get("OPENROUTER_API_KEY")
+if not API_KEY:
+    print("Error: Set OPENROUTER_API_KEY environment variable")
+    sys.exit(1)
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 MODELS = [

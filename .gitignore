@@ -1,0 +1,5 @@
+scripts/
+feedback/
+*.pyc
+__pycache__/
+.env

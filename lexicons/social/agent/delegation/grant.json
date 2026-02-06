@@ -18,8 +18,6 @@
           "scope": {
             "type": "array",
             "items": { "type": "string", "maxLength": 256 },
-            "minItems": 1,
-            "maxItems": 20,
             "description": "Allowed action NSIDs (e.g. 'app.bsky.feed.post')"
           },
           "mode": {
@@ -53,8 +51,7 @@
       "properties": {
         "topics": {
           "type": "array",
-          "items": { "type": "string", "maxLength": 256 },
-          "maxItems": 20
+          "items": { "type": "string", "maxLength": 256 }
         },
         "maxPerDay": {
           "type": "integer",
@@ -70,8 +67,7 @@
         },
         "blockedKeywords": {
           "type": "array",
-          "items": { "type": "string", "maxLength": 256 },
-          "maxItems": 100
+          "items": { "type": "string", "maxLength": 256 }
         },
         "maxLength": {
           "type": "integer",

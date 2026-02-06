@@ -34,13 +34,11 @@
           },
           "langs": {
             "type": "array",
-            "items": { "type": "string", "format": "language" },
-            "maxItems": 3
+            "items": { "type": "string", "format": "language" }
           },
           "tags": {
             "type": "array",
-            "items": { "type": "string", "maxLength": 640 },
-            "maxItems": 8
+            "items": { "type": "string", "maxLength": 640 }
           }
         }
       }
@@ -69,8 +67,16 @@
       "type": "object",
       "required": ["root", "parent"],
       "properties": {
-        "root": { "type": "ref", "ref": "com.atproto.repo.strongRef" },
-        "parent": { "type": "ref", "ref": "com.atproto.repo.strongRef" }
+        "root": { "type": "ref", "ref": "#strongRef" },
+        "parent": { "type": "ref", "ref": "#strongRef" }
+      }
+    },
+    "strongRef": {
+      "type": "object",
+      "required": ["uri", "cid"],
+      "properties": {
+        "uri": { "type": "string", "format": "at-uri" },
+        "cid": { "type": "string" }
       }
     },
     "dataEmbed": {

@@ -5,7 +5,7 @@
   "defs": {
     "main": {
       "type": "record",
-      "key": "self",
+      "key": "literal:self",
       "record": {
         "type": "object",
         "required": ["displayName"],
@@ -36,19 +36,16 @@
           "capabilities": {
             "type": "array",
             "items": { "type": "string", "maxLength": 256 },
-            "maxItems": 50,
             "description": "Human-readable capability tags (e.g. 'code-review', 'translation')"
           },
           "protocols": {
             "type": "array",
             "items": { "type": "string", "maxLength": 256 },
-            "maxItems": 20,
             "description": "Supported protocols (e.g. 'a2a', 'mcp', 'atproto')"
           },
           "endpoints": {
             "type": "array",
             "items": { "type": "ref", "ref": "#endpoint" },
-            "maxItems": 10,
             "description": "Service endpoints for interacting with this agent"
           },
           "voice": {
@@ -59,7 +56,6 @@
           "links": {
             "type": "array",
             "items": { "type": "ref", "ref": "#externalLink" },
-            "maxItems": 20,
             "description": "External links (website, docs, source code, etc.)"
           },
           "createdAt": {

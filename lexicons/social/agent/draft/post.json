@@ -72,28 +72,22 @@
         },
         "facets": {
           "type": "array",
-          "items": { "type": "ref", "ref": "app.bsky.richtext.facet" }
+          "items": { "type": "ref", "ref": "#facet" }
         },
         "embed": {
           "type": "union",
-          "refs": [
-            "app.bsky.embed.images",
-            "app.bsky.embed.external",
-            "app.bsky.embed.record",
-            "app.bsky.embed.recordWithMedia"
-          ]
+          "refs": ["#linkEmbed"]
         },
         "reply": {
           "type": "object",
           "properties": {
-            "root": { "type": "ref", "ref": "com.atproto.repo.strongRef" },
-            "parent": { "type": "ref", "ref": "com.atproto.repo.strongRef" }
+            "root": { "type": "ref", "ref": "#strongRef" },
+            "parent": { "type": "ref", "ref": "#strongRef" }
           }
         },
         "langs": {
           "type": "array",
-          "items": { "type": "string", "format": "language" },
-          "maxItems": 3
+          "items": { "type": "string", "format": "language" }
         }
       }
     },
@@ -117,6 +111,47 @@
           "type": "string",
           "format": "datetime"
         }
+      }
+    },
+    "strongRef": {
+      "type": "object",
+      "required": ["uri", "cid"],
+      "properties": {
+        "uri": { "type": "string", "format": "at-uri" },
+        "cid": { "type": "string" }
+      }
+    },
+    "facet": {
+      "type": "object",
+      "required": ["index", "features"],
+      "properties": {
+        "index": { "type": "ref", "ref": "#byteSlice" },
+        "features": { "type": "array", "items": { "type": "ref", "ref": "#facetFeature" } }
+      }
+    },
+    "byteSlice": {
+      "type": "object",
+      "required": ["byteStart", "byteEnd"],
+      "properties": {
+        "byteStart": { "type": "integer", "minimum": 0 },
+        "byteEnd": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "facetFeature": {
+      "type": "object",
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "did": { "type": "string", "format": "did" },
+        "tag": { "type": "string", "maxLength": 640 }
+      }
+    },
+    "linkEmbed": {
+      "type": "object",
+      "required": ["uri"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "title": { "type": "string", "maxLength": 640 },
+        "description": { "type": "string", "maxLength": 2560 }
       }
     },
     "constraintResult": {

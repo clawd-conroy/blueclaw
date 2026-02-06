@@ -5,15 +5,14 @@
   "defs": {
     "main": {
       "type": "record",
-      "key": "self",
+      "key": "literal:self",
       "record": {
         "type": "object",
         "required": ["capabilities"],
         "properties": {
           "capabilities": {
             "type": "array",
-            "items": { "type": "ref", "ref": "#capability" },
-            "maxItems": 50
+            "items": { "type": "ref", "ref": "#capability" }
           },
           "a2aCard": {
             "type": "string",
@@ -22,13 +21,11 @@
           },
           "inputFormats": {
             "type": "array",
-            "items": { "type": "string" },
-            "maxItems": 20
+            "items": { "type": "string" }
           },
           "outputFormats": {
             "type": "array",
-            "items": { "type": "string" },
-            "maxItems": 20
+            "items": { "type": "string" }
           },
           "pricing": {
             "type": "ref",
@@ -49,8 +46,7 @@
         "description": { "type": "string", "maxLength": 1000 },
         "examples": {
           "type": "array",
-          "items": { "type": "string", "maxLength": 500 },
-          "maxItems": 5
+          "items": { "type": "string", "maxLength": 500 }
         }
       }
     },

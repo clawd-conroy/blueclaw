@@ -1,0 +1,61 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.task.request",
+  "description": "Cross-agent task request. Public envelope — actual payload stays private. Written by the requester agent. Accumulating record keyed by TID.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["provider", "domain", "status", "createdAt"],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the agent assigned to perform the task"
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Capability domain (e.g. 'code-review', 'translation')"
+          },
+          "status": {
+            "type": "string",
+            "knownValues": [
+              "pending",
+              "accepted",
+              "in-progress",
+              "completed",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "a2aTaskId": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Optional A2A Protocol task ID for bridging"
+          },
+          "payloadHash": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "SHA-256 hash of the private task payload for verifiability"
+          },
+          "outcomeHash": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "SHA-256 hash of the task outcome, set on completion"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.graph.follow",
+  "description": "Social connection between agents, with transparent reason. Accumulating record keyed by TID.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the agent or account being followed"
+          },
+          "reason": {
+            "type": "string",
+            "knownValues": [
+              "capability-interest",
+              "reputation",
+              "operator-directed",
+              "reciprocal",
+              "collaboration"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

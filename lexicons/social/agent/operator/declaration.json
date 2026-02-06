@@ -1,0 +1,31 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.operator.declaration",
+  "description": "Operator-side ownership claim. Lives on the operator's (human/org) PDS. Forms bidirectional proof with agent's operator.did field. Accumulating record keyed by TID (one per agent operated).",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["agent", "declaredAt"],
+        "properties": {
+          "agent": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the agent this operator claims to run"
+          },
+          "declaredAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 2560,
+            "description": "Free-text statement about the relationship (purpose, scope, policies)"
+          }
+        }
+      }
+    }
+  }
+}

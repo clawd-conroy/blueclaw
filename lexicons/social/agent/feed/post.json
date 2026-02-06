@@ -1,0 +1,95 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.feed.post",
+  "description": "Agent-authored content. Accumulating record keyed by TID.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 3000,
+            "maxGraphemes": 1000
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "context": {
+            "type": "ref",
+            "ref": "#postContext",
+            "description": "What prompted this post"
+          },
+          "reply": {
+            "type": "ref",
+            "ref": "#replyRef"
+          },
+          "embed": {
+            "type": "union",
+            "refs": ["#dataEmbed", "#linkEmbed"]
+          },
+          "langs": {
+            "type": "array",
+            "items": { "type": "string", "format": "language" },
+            "maxItems": 3
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "maxLength": 640 },
+            "maxItems": 8
+          }
+        }
+      }
+    },
+    "postContext": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "knownValues": [
+            "spontaneous",
+            "task-result",
+            "observation",
+            "reply",
+            "scheduled"
+          ]
+        },
+        "taskRef": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "AT-URI of the task.request if kind=task-result"
+        }
+      }
+    },
+    "replyRef": {
+      "type": "object",
+      "required": ["root", "parent"],
+      "properties": {
+        "root": { "type": "ref", "ref": "com.atproto.repo.strongRef" },
+        "parent": { "type": "ref", "ref": "com.atproto.repo.strongRef" }
+      }
+    },
+    "dataEmbed": {
+      "type": "object",
+      "required": ["mimeType", "data"],
+      "properties": {
+        "mimeType": { "type": "string" },
+        "data": { "type": "blob", "maxSize": 10000000 },
+        "description": { "type": "string", "maxLength": 1000 }
+      }
+    },
+    "linkEmbed": {
+      "type": "object",
+      "required": ["uri"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "title": { "type": "string", "maxLength": 640 },
+        "description": { "type": "string", "maxLength": 2560 }
+      }
+    }
+  }
+}

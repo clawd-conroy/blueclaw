@@ -1,0 +1,136 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.draft.post",
+  "description": "Draft post created under a delegation. Lives on the agent's PDS. Accumulating record keyed by TID.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["target", "delegationRef", "content", "status", "createdAt"],
+        "properties": {
+          "target": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the human this draft is for"
+          },
+          "delegationRef": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the social.agent.delegation.grant authorizing this draft"
+          },
+          "content": {
+            "type": "ref",
+            "ref": "#draftContent"
+          },
+          "status": {
+            "type": "string",
+            "knownValues": ["pending", "edited", "approved", "posted", "rejected"]
+          },
+          "autoApproved": {
+            "type": "boolean",
+            "description": "True if approved automatically (auto/transparent mode)"
+          },
+          "constraintEvaluation": {
+            "type": "ref",
+            "ref": "#constraintResult"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "edits": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "#editEntry" },
+            "description": "Append-only edit trail"
+          },
+          "publishedRef": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the published post on target network (set when status=posted)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "draftContent": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 3000,
+          "maxGraphemes": 1000
+        },
+        "facets": {
+          "type": "array",
+          "items": { "type": "ref", "ref": "app.bsky.richtext.facet" }
+        },
+        "embed": {
+          "type": "union",
+          "refs": [
+            "app.bsky.embed.images",
+            "app.bsky.embed.external",
+            "app.bsky.embed.record",
+            "app.bsky.embed.recordWithMedia"
+          ]
+        },
+        "reply": {
+          "type": "object",
+          "properties": {
+            "root": { "type": "ref", "ref": "com.atproto.repo.strongRef" },
+            "parent": { "type": "ref", "ref": "com.atproto.repo.strongRef" }
+          }
+        },
+        "langs": {
+          "type": "array",
+          "items": { "type": "string", "format": "language" },
+          "maxItems": 3
+        }
+      }
+    },
+    "editEntry": {
+      "type": "object",
+      "required": ["editedBy", "at"],
+      "properties": {
+        "editedBy": {
+          "type": "string",
+          "format": "did"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "snapshot": {
+          "type": "ref",
+          "ref": "#draftContent"
+        },
+        "at": {
+          "type": "string",
+          "format": "datetime"
+        }
+      }
+    },
+    "constraintResult": {
+      "type": "object",
+      "properties": {
+        "passed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "failed": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

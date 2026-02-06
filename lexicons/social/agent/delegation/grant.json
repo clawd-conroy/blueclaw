@@ -1,0 +1,96 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.delegation.grant",
+  "description": "Delegation grant from a human to an agent. Lives on the grantor's (human's) PDS. Accumulating record keyed by TID (one per delegation).",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["grantee", "scope", "mode", "createdAt"],
+        "properties": {
+          "grantee": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the agent receiving delegation"
+          },
+          "scope": {
+            "type": "array",
+            "items": { "type": "string", "maxLength": 256 },
+            "minItems": 1,
+            "maxItems": 20,
+            "description": "Allowed action NSIDs (e.g. 'app.bsky.feed.post')"
+          },
+          "mode": {
+            "type": "string",
+            "knownValues": ["draft", "auto", "transparent"],
+            "description": "Approval mode"
+          },
+          "targetNetwork": {
+            "type": "string",
+            "knownValues": ["bluesky", "mastodon", "x", "email"],
+            "description": "Target network. Defaults to 'bluesky'."
+          },
+          "constraints": {
+            "type": "ref",
+            "ref": "#delegationConstraints"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Delegation is invalid after this time"
+          }
+        }
+      }
+    },
+    "delegationConstraints": {
+      "type": "object",
+      "properties": {
+        "topics": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 256 },
+          "maxItems": 20
+        },
+        "maxPerDay": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxPerHour": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "allowedHours": {
+          "type": "ref",
+          "ref": "#timeWindow"
+        },
+        "blockedKeywords": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 256 },
+          "maxItems": 100
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3000
+        },
+        "noReplies": { "type": "boolean" },
+        "noQuotes": { "type": "boolean" },
+        "requireMedia": { "type": "boolean" }
+      }
+    },
+    "timeWindow": {
+      "type": "object",
+      "required": ["start", "end", "tz"],
+      "properties": {
+        "start": { "type": "string", "description": "HH:MM format" },
+        "end": { "type": "string", "description": "HH:MM format" },
+        "tz": { "type": "string", "description": "IANA timezone" }
+      }
+    }
+  }
+}

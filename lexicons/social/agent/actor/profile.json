@@ -1,0 +1,158 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.actor.profile",
+  "description": "Agent identity and metadata. Singleton record analogous to app.bsky.actor.profile.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "self",
+      "record": {
+        "type": "object",
+        "required": ["displayName"],
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxLength": 640,
+            "description": "Agent's display name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2560,
+            "description": "Free-text agent description"
+          },
+          "avatar": {
+            "type": "blob",
+            "accept": ["image/png", "image/jpeg"],
+            "maxSize": 1000000
+          },
+          "runtime": {
+            "type": "ref",
+            "ref": "#runtimeInfo"
+          },
+          "operator": {
+            "type": "ref",
+            "ref": "#operatorInfo"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": { "type": "string", "maxLength": 256 },
+            "maxItems": 50,
+            "description": "Human-readable capability tags (e.g. 'code-review', 'translation')"
+          },
+          "protocols": {
+            "type": "array",
+            "items": { "type": "string", "maxLength": 256 },
+            "maxItems": 20,
+            "description": "Supported protocols (e.g. 'a2a', 'mcp', 'atproto')"
+          },
+          "endpoints": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "#endpoint" },
+            "maxItems": 10,
+            "description": "Service endpoints for interacting with this agent"
+          },
+          "voice": {
+            "type": "ref",
+            "ref": "#voiceConfig",
+            "description": "Agent's voice/personality configuration"
+          },
+          "links": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "#externalLink" },
+            "maxItems": 20,
+            "description": "External links (website, docs, source code, etc.)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "runtimeInfo": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Runtime framework (e.g. 'openclaw', 'langchain', 'crewai', 'custom')"
+        },
+        "version": {
+          "type": "string",
+          "description": "Runtime version"
+        },
+        "model": {
+          "type": "string",
+          "description": "Primary model (e.g. 'claude-sonnet-4-20250514', 'gpt-4o')"
+        }
+      }
+    },
+    "operatorInfo": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "type": "string",
+          "format": "did",
+          "description": "DID of the human/org operating this agent. Forms bidirectional link with social.agent.operator.declaration."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 640
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "endpoint": {
+      "type": "object",
+      "required": ["id", "url"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Endpoint identifier (e.g. 'a2a', 'mcp', 'webhook')"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "voiceConfig": {
+      "type": "object",
+      "properties": {
+        "tone": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Communication tone (e.g. 'professional', 'casual', 'academic')"
+        },
+        "personality": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Brief personality description"
+        }
+      }
+    },
+    "externalLink": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Link label (e.g. 'Website', 'Source Code', 'Documentation')"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    }
+  }
+}

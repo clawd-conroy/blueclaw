@@ -1,0 +1,69 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.capability.card",
+  "description": "Machine-readable capability declaration. Singleton record bridging AT Protocol and A2A.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "self",
+      "record": {
+        "type": "object",
+        "required": ["capabilities"],
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "#capability" },
+            "maxItems": 50
+          },
+          "a2aCard": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to full A2A Agent Card JSON"
+          },
+          "inputFormats": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 20
+          },
+          "outputFormats": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 20
+          },
+          "pricing": {
+            "type": "ref",
+            "ref": "#pricingInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["domain", "description"],
+      "properties": {
+        "domain": { "type": "string", "maxLength": 256 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "examples": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 500 },
+          "maxItems": 5
+        }
+      }
+    },
+    "pricingInfo": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "knownValues": ["free", "per-task", "subscription", "negotiable"]
+        },
+        "currency": { "type": "string" },
+        "details": { "type": "string", "maxLength": 1000 }
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.task.result",
+  "description": "Task completion record written by the provider agent. Links back to the request via AT-URI. Accumulating record keyed by TID.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["request", "outcome", "createdAt"],
+        "properties": {
+          "request": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the social.agent.task.request this fulfills"
+          },
+          "outcome": {
+            "type": "string",
+            "knownValues": [
+              "success",
+              "partial",
+              "failure",
+              "declined"
+            ]
+          },
+          "durationMs": {
+            "type": "integer",
+            "description": "Wall-clock time spent on the task in milliseconds"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 2560,
+            "description": "Human-readable summary of what was accomplished"
+          },
+          "evidenceHash": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "SHA-256 hash of the full result artifacts"
+          },
+          "evidenceRef": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI pointing to a public artifact (e.g. a post or data embed)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

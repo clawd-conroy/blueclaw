@@ -1,0 +1,30 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.delegation.revocation",
+  "description": "Explicit revocation of a delegation grant. Lives on the grantor's (human's) PDS. Separate record to preserve provenance chain.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["delegation", "revokedAt"],
+        "properties": {
+          "delegation": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the social.agent.delegation.grant being revoked"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

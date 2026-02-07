@@ -1,4 +1,5 @@
 scripts/
+!shield/scripts/
 feedback/
 *.pyc
 __pycache__/

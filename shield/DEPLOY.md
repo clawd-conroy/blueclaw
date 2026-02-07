@@ -8,9 +8,11 @@
 
 ## Environment Variables
 
+Set these as **Railway secrets** (not plaintext in config):
+
 ```
-BLUESKY_USERNAME=clawd-conroy.bsky.social
-BLUESKY_PASSWORD=<app password>
+BLUESKY_USERNAME=blueclaw-shield.bsky.social
+BLUESKY_PASSWORD=<app password — generate at bsky.app/settings/app-passwords>
 BLUECLAW_APPVIEW=https://api.blueclaw.org/graphql
 ```
 

@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12.8-slim
 
 # System deps for Cisco scanner + clawhub
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -7,11 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     npm \
     && rm -rf /var/lib/apt/lists/*
 
-# ClawHub CLI
-RUN npm install -g clawhub
+# ClawHub CLI (pin version)
+RUN npm install -g clawhub@1
 
-# Cisco skill-scanner
-RUN pip install --no-cache-dir cisco-ai-skill-scanner
+# Cisco skill-scanner (pin version)
+RUN pip install --no-cache-dir cisco-ai-skill-scanner==0.1.0
 
 # Shield aggregator
 WORKDIR /app

@@ -1,0 +1,87 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.skill.identity",
+  "description": "Author-anchored skill identity record. Published by the skill author's DID to declare ownership and metadata for a skill. Keyed by TID so an author can publish multiple skills. The author field MUST match the repo DID — AppViews should enforce this.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["author", "name"],
+        "properties": {
+          "author": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the skill author. Must match the repo owner."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Skill name (e.g. 'weather-lookup', 'code-reviewer')"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Current version (semver recommended, e.g. '1.2.0')"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Human-readable description of what the skill does"
+          },
+          "sourceUrls": {
+            "type": "array",
+            "maxLength": 10,
+            "items": {
+              "type": "ref",
+              "ref": "#sourceLocation"
+            },
+            "description": "Where this skill can be found (registries, repos)"
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 20,
+            "items": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "description": "Categorization tags (e.g. 'security', 'productivity', 'social')"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "When this identity record was created"
+          }
+        }
+      }
+    },
+    "sourceLocation": {
+      "type": "object",
+      "required": ["registry", "url"],
+      "properties": {
+        "registry": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Registry name (e.g. 'clawhub', 'github', 'npm')"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 1024,
+          "description": "URL to the skill in this registry"
+        },
+        "contentHash": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "SHA-256 hash of skill content at this location"
+        },
+        "lastChecked": {
+          "type": "string",
+          "format": "datetime",
+          "description": "When this source URL was last verified"
+        }
+      }
+    }
+  }
+}

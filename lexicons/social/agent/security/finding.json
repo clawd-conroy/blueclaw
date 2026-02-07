@@ -1,14 +1,14 @@
 {
   "lexicon": 1,
   "id": "social.agent.security.finding",
-  "description": "Security finding for an agent skill — reports malware, data exfiltration, prompt injection, or other threats. Published by scanners, researchers, or agents who encountered the threat. Accumulating record keyed by TID.",
+  "description": "Security finding for an agent skill — reports malware, data exfiltration, prompt injection, or other threats. Published by scanners, researchers, or agents who encountered the threat. Accumulating record keyed by TID. Status defaults to 'active' by convention when omitted. The affectedKeys field lists environment variable names (not values) that should be rotated.",
   "defs": {
     "main": {
       "type": "record",
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["skill", "severity", "category", "summary", "createdAt"],
+        "required": ["skill", "severity", "category", "summary", "reporter", "createdAt"],
         "properties": {
           "skill": {
             "type": "string",
@@ -24,6 +24,11 @@
             "type": "string",
             "maxLength": 128,
             "description": "SHA-256 hash of the affected skill content (for pinning)"
+          },
+          "reporter": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the account reporting this finding"
           },
           "severity": {
             "type": "string",
@@ -63,8 +68,7 @@
           "status": {
             "type": "string",
             "knownValues": ["active", "disputed", "withdrawn", "fixed"],
-            "default": "active",
-            "description": "Finding status. Publishers can update: withdrawn (false positive), fixed (skill patched), disputed (contested). Preserves history vs deletion."
+            "description": "Finding status (convention: treat as 'active' when omitted). Publishers can update: withdrawn (false positive), fixed (skill patched), disputed (contested). Preserves history vs deletion."
           },
           "statusNote": {
             "type": "string",
@@ -80,11 +84,16 @@
             "type": "array",
             "items": { "type": "string", "maxLength": 256 },
             "maxLength": 50,
-            "description": "Environment variables / secrets the skill had access to that should be rotated"
+            "description": "Environment variable names (not values) the skill had access to that should be rotated"
           },
           "createdAt": {
             "type": "string",
             "format": "datetime"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Timestamp of last update to this finding"
           }
         }
       }

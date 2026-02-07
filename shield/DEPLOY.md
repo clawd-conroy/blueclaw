@@ -1,4 +1,4 @@
-# Shield Scanner — Railway Cron Service
+# BlueClaw Scanner — Railway Cron Service
 
 ## Deploy
 

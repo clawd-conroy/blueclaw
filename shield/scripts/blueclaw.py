@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 """
-shield-check.py — Check installed skills against BlueClaw security findings.
+blueclaw.py — BlueClaw CLI for agent skill security.
 
-This is the thin client that agents run. Queries BlueClaw's GraphQL AppView
-for any known security findings against your installed skills.
+Subcommands:
+  scan    Check installed skills against BlueClaw security findings.
 
-Note: When the AppView is unreachable, this tool fails closed — it reports
-that skills could NOT be verified rather than silently passing them.
+Future subcommands (not yet implemented):
+  publish   Publish a skill identity record to your PDS.
+  review    Submit or view security findings for a skill.
+  verify    Verify a skill's identity and source integrity.
 
 Usage:
-  # Audit all installed skills
-  python3 shield-check.py audit
+  # Scan all installed skills
+  python3 blueclaw.py scan
 
-  # Check a specific skill before installing
-  python3 shield-check.py check publisher/name
+  # Scan a specific skill before installing
+  python3 blueclaw.py scan publisher/name
 
-  # JSON output (for programmatic use)
-  python3 shield-check.py audit --json
+  # Scan a local skills directory
+  python3 blueclaw.py scan /path/to/skills
+
+  # JSON output
+  python3 blueclaw.py scan --json
 """
 
 import argparse
@@ -41,7 +46,7 @@ if not APPVIEW_GQL.startswith("https://"):
 
 # GraphQL query for security findings
 FINDINGS_QUERY = """
-query ShieldCheck($skills: [String!]!) {
+query BlueclawScan($skills: [String!]!) {
   securityFindings(skills: $skills, status: [ACTIVE, DISPUTED]) {
     skill
     skillVersion
@@ -60,8 +65,17 @@ query ShieldCheck($skills: [String!]!) {
 """
 
 
-def get_installed_skills():
-    """Get installed skills from clawhub list."""
+def get_installed_skills(path=None):
+    """Get installed skills from clawhub list or by scanning a directory."""
+    if path and os.path.isdir(path):
+        # Scan a directory for skills (look for SKILL.md files)
+        skills = []
+        for entry in os.listdir(path):
+            skill_md = os.path.join(path, entry, "SKILL.md")
+            if os.path.isfile(skill_md):
+                skills.append({"name": entry, "version": "local"})
+        return skills
+
     result = subprocess.run(
         ["clawhub", "list"],
         capture_output=True, text=True,
@@ -80,12 +94,11 @@ def get_installed_skills():
 
 def query_findings(skill_names):
     """Query BlueClaw AppView for security findings."""
-    # Prefix with clawhub: for registry-qualified lookup
     qualified = [f"clawhub:{s}" for s in skill_names]
 
     payload = json.dumps({
         "query": FINDINGS_QUERY,
-        "variables": {"skills": qualified + skill_names},  # check both qualified and bare
+        "variables": {"skills": qualified + skill_names},
     }).encode()
 
     req = urllib.request.Request(
@@ -99,7 +112,6 @@ def query_findings(skill_names):
             data = json.loads(resp.read())
             return data.get("data", {}).get("securityFindings", [])
     except Exception as e:
-        # Fail closed: report that we could NOT verify, don't silently pass
         print(f"⚠️  Could not reach BlueClaw AppView: {e}", file=sys.stderr)
         print(f"   URL: {APPVIEW_GQL}", file=sys.stderr)
         return None
@@ -122,33 +134,29 @@ def severity_rank(sev):
 
 
 def print_report(skills, findings):
-    """Print human-readable shield report."""
+    """Print human-readable scan report."""
     if findings is None:
-        # Fail closed: unreachable means NOT verified
-        print("🛡️ Shield Audit — ⚠️ Could not reach findings database")
+        print("🦞 BlueClaw Scan — ⚠️ Could not reach findings database")
         print("   Your skills were NOT checked. Try again later.")
         return 1
 
-    # Group findings by skill
     by_skill = {}
     for f in findings:
         skill = f["skill"].replace("clawhub:", "")
         by_skill.setdefault(skill, []).append(f)
 
-    # Sort findings by severity
     for skill in by_skill:
         by_skill[skill].sort(key=lambda f: severity_rank(f["severity"]))
 
     clean = [s for s in skills if s["name"] not in by_skill]
     flagged = [s for s in skills if s["name"] in by_skill]
 
-    print(f"🛡️ Shield Audit — {len(skills)} skills checked\n")
+    print(f"🦞 BlueClaw Scan — {len(skills)} skills checked\n")
 
     if not flagged:
         print(f"✅ All {len(clean)} skills clean. No known security findings.")
         return 0
 
-    # Show flagged skills
     has_critical = False
     for skill in flagged:
         skill_findings = by_skill[skill["name"]]
@@ -172,7 +180,6 @@ def print_report(skills, findings):
                 print(f"    Details: {f['evidence']}")
             print()
 
-    # Summary
     print(f"───────────────────────────")
     print(f"✅ {len(clean)} clean | {severity_icon('critical')} {len(flagged)} with findings")
     if has_critical:
@@ -181,12 +188,46 @@ def print_report(skills, findings):
     return 2 if has_critical else 1
 
 
-def cmd_audit(args):
-    """Audit all installed skills."""
-    skills = get_installed_skills()
-    if not skills:
-        print("No skills installed (or clawhub not available).")
-        return
+def cmd_scan(args):
+    """Scan skills for known security findings."""
+    if args.target:
+        if os.path.isdir(args.target):
+            skills = get_installed_skills(path=args.target)
+            if not skills:
+                print(f"No skills found in {args.target}")
+                return
+        else:
+            # Treat as a single skill name
+            findings = query_findings([args.target])
+            if args.json:
+                print(json.dumps({"skill": args.target, "findings": findings or []}, indent=2))
+                return
+            if findings is None:
+                print(f"⚠️  Could not reach BlueClaw AppView")
+                sys.exit(1)
+            if not findings:
+                print(f"✅ {args.target} — No known security findings.")
+            else:
+                findings.sort(key=lambda f: severity_rank(f["severity"]))
+                worst = findings[0]["severity"]
+                print(f"{severity_icon(worst)} {args.target} — {len(findings)} finding(s):\n")
+                for f in findings:
+                    print(f"  [{f['severity'].upper()}] {f['category']}: {f['summary'][:120]}")
+                    if f.get("remediation"):
+                        print(f"  Remediation: {f['remediation'][:120]}")
+                    print()
+                if worst in ("critical", "high"):
+                    print(f"🚨 Do NOT install this skill.")
+                    sys.exit(2)
+                else:
+                    print(f"⚠️  Proceed with caution.")
+                    sys.exit(1)
+            return
+    else:
+        skills = get_installed_skills()
+        if not skills:
+            print("No skills installed (or clawhub not available).")
+            return
 
     skill_names = [s["name"] for s in skills]
     findings = query_findings(skill_names)
@@ -201,54 +242,30 @@ def cmd_audit(args):
         sys.exit(print_report(skills, findings))
 
 
-def cmd_check(args):
-    """Check a specific skill."""
-    findings = query_findings([args.skill])
-
-    if args.json:
-        print(json.dumps({"skill": args.skill, "findings": findings or []}, indent=2))
-        return
-
-    if findings is None:
-        print(f"⚠️  Could not reach BlueClaw AppView")
-        sys.exit(1)
-
-    if not findings:
-        print(f"✅ {args.skill} — No known security findings. Safe to install.")
-    else:
-        findings.sort(key=lambda f: severity_rank(f["severity"]))
-        worst = findings[0]["severity"]
-        print(f"{severity_icon(worst)} {args.skill} — {len(findings)} finding(s):\n")
-        for f in findings:
-            print(f"  [{f['severity'].upper()}] {f['category']}: {f['summary'][:120]}")
-            if f.get("remediation"):
-                print(f"  Remediation: {f['remediation'][:120]}")
-            print()
-        if worst in ("critical", "high"):
-            print(f"🚨 Do NOT install this skill.")
-            sys.exit(2)
-        else:
-            print(f"⚠️  Proceed with caution.")
-            sys.exit(1)
-
-
 def main():
-    parser = argparse.ArgumentParser(description="🛡️ BlueClaw Shield — Check skills against security findings")
+    parser = argparse.ArgumentParser(
+        description="🦞 BlueClaw — Security tooling for agent skills",
+        prog="blueclaw",
+    )
     sub = parser.add_subparsers(dest="command")
 
-    p_audit = sub.add_parser("audit", help="Audit all installed skills")
-    p_audit.add_argument("--json", action="store_true", help="JSON output")
-    p_audit.set_defaults(func=cmd_audit)
+    p_scan = sub.add_parser("scan", help="Check skills against known security findings")
+    p_scan.add_argument("target", nargs="?", help="Skill name, path to skills dir, or omit to scan all installed")
+    p_scan.add_argument("--json", action="store_true", help="JSON output")
+    p_scan.set_defaults(func=cmd_scan)
 
-    p_check = sub.add_parser("check", help="Check a specific skill before installing")
-    p_check.add_argument("skill", help="Skill slug (e.g. publisher/name)")
-    p_check.add_argument("--json", action="store_true", help="JSON output")
-    p_check.set_defaults(func=cmd_check)
+    # Future subcommands (documented, not implemented)
+    sub.add_parser("publish", help="Publish a skill identity record (coming soon)")
+    sub.add_parser("review", help="Submit or view security findings (coming soon)")
+    sub.add_parser("verify", help="Verify skill identity and source integrity (coming soon)")
 
     args = parser.parse_args()
     if not args.command:
         parser.print_help()
         sys.exit(1)
+    if args.command in ("publish", "review", "verify"):
+        print(f"🦞 `blueclaw {args.command}` is not yet implemented. Stay tuned!")
+        sys.exit(0)
     args.func(args)
 
 

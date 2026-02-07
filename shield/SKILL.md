@@ -1,111 +1,75 @@
 ---
-name: shield
-description: "Security scanner for installed agent skills. Checks your skills against BlueClaw's aggregated security findings (CVE-style database for agent skills). Alerts on known malware, data exfiltration, prompt injection, and other threats. Recommends key rotation when compromised skills had secret access."
+name: blueclaw
+description: "Security tooling for agent skills. Scan installed skills against BlueClaw's aggregated security findings database. Alerts on known malware, data exfiltration, prompt injection, and other threats. Recommends key rotation when compromised skills had secret access."
 metadata:
   {
     "openclaw":
       {
-        "emoji": "🛡️",
+        "emoji": "🦞",
         "requires": { "bins": ["clawhub"] },
       },
   }
 ---
 
-# BlueClaw Shield
+# BlueClaw
 
-A skill that protects you from other skills.
+Security tooling for agent skills — a CLI with subcommands.
 
-## What It Does
+## Subcommands
 
-Shield checks your installed OpenClaw skills against BlueClaw's aggregated security findings database — think CVE/NVD but for agent skills.
+### `blueclaw scan`
 
-**Pre-install check:** Before installing a new skill, check if it has any known security findings.
+Check your installed skills against BlueClaw's aggregated security findings database — think CVE/NVD but for agent skills.
 
-**Audit installed:** Scan all currently installed skills against the findings database.
-
-**Continuous monitoring:** Run periodically (via heartbeat or cron) to catch newly-published findings against skills you already have.
-
-## How To Use
-
-### Check a skill before installing
+**Scan all installed skills:**
 ```
-shield check <publisher/name>
+blueclaw scan
+```
+Lists all installed skills (via `clawhub list`), checks each against the findings database, reports results.
+
+**Check a specific skill before installing:**
+```
+blueclaw scan publisher/name
 ```
 Query the BlueClaw AppView for any security findings against this skill.
 
-### Audit all installed skills
+**Scan a local skills directory:**
 ```
-shield audit
+blueclaw scan /path/to/skills
 ```
-List all installed skills (via `clawhub list`), check each against the findings database, report results.
+Finds skills by looking for `SKILL.md` files in subdirectories.
 
-### Run as continuous monitor
-Add to heartbeat or cron — Shield will check installed skills and alert on any new findings since last check.
+**JSON output:**
+```
+blueclaw scan --json
+```
 
-## How It Works
+### `blueclaw publish` *(coming soon)*
 
-1. Gets list of installed skills from `clawhub list`
-2. Queries BlueClaw GraphQL AppView: `findings(skills: ["publisher/name", ...])`
+Publish a `social.agent.skill.identity` record to your PDS, declaring authorship and metadata for a skill you maintain.
+
+### `blueclaw review` *(coming soon)*
+
+Submit or view security findings for a skill. Community-driven security reporting.
+
+### `blueclaw verify` *(coming soon)*
+
+Verify a skill's identity and source integrity — check that the author's DID matches, content hashes are valid, and no tampering has occurred.
+
+## How `scan` Works
+
+1. Gets list of installed skills from `clawhub list` (or scans a directory)
+2. Queries BlueClaw GraphQL AppView: `findings(skills: [...])`
 3. Filters by status (active findings only, shows disputed as warnings)
 4. Reports findings with severity, category, remediation steps
-5. If a compromised skill had access to secrets → recommends which keys to rotate
+5. Fails closed — if the AppView is unreachable, reports skills as NOT verified
 
-## Skill Identity
+## Exit Codes
 
-Skills are matched by multiple identifiers for robustness:
-- **Registry slug:** `clawhub:publisher/name` (primary)
-- **Content hash:** `sha256:...` (pins exact version)
-- **Source repo:** `github:org/repo` (when known)
+- `0` — All skills clean
+- `1` — Warnings or couldn't reach AppView
+- `2` — Critical/high severity findings detected
 
-A finding against any matching identifier flags the skill.
+## Internal Tooling
 
-## Data Source
-
-BlueClaw AppView GraphQL endpoint. Findings are published as `social.agent.security.finding` records on AT Protocol by:
-- Automated scanners (Cisco skill-scanner, Snyk, VirusTotal)
-- Security researchers
-- Community reports from agents who encountered threats
-
-All findings are signed by the publisher's DID. Trust-weighted: established scanner > known researcher > anonymous report.
-
-## Output Format
-
-```
-🛡️ Shield Audit — 12 skills checked
-
-✅ 10 clean
-⚠️  1 disputed finding
-  foo/twitter-poster v1.2.0
-    [MEDIUM] prompt-injection (disputed by author)
-    Scanner: cisco-skill-scanner
-    Status: disputed — "Author claims intentional behavior"
-
-🚨 1 active finding
-  bar/crypto-helper v2.0.1
-    [CRITICAL] data-exfiltration — Sends env vars to external endpoint
-    Scanner: snyk
-    Status: active
-    Remediation: Uninstall immediately. Rotate: OPENAI_API_KEY, GITHUB_TOKEN
-    Details: https://snyk.io/advisory/...
-```
-
-## GraphQL Query
-
-```graphql
-query ShieldCheck($skills: [String!]!) {
-  securityFindings(skills: $skills, status: [ACTIVE, DISPUTED]) {
-    skill
-    skillVersion
-    severity
-    category
-    summary
-    scanner
-    status
-    statusNote
-    remediation
-    affectedKeys
-    evidence
-    createdAt
-  }
-}
-```
+The `shield-aggregator.py` script is internal infrastructure that runs on Railway as a cron job. It scans ClawHub skills using Cisco's skill-scanner and publishes `social.agent.security.finding` records to the BlueClaw PDS. See `DEPLOY.md` for Railway setup.

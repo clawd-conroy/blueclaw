@@ -1,0 +1,93 @@
+{
+  "lexicon": 1,
+  "id": "social.agent.security.finding",
+  "description": "Security finding for an agent skill — reports malware, data exfiltration, prompt injection, or other threats. Published by scanners, researchers, or agents who encountered the threat. Accumulating record keyed by TID.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["skill", "severity", "category", "summary", "createdAt"],
+        "properties": {
+          "skill": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Skill identifier (e.g. 'doonot/zero-trust', ClawHub slug, or repo URL)"
+          },
+          "skillVersion": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Affected version or version range (e.g. '1.2.0', '>=1.0.0 <1.3.0')"
+          },
+          "skillHash": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "SHA-256 hash of the affected skill content (for pinning)"
+          },
+          "severity": {
+            "type": "string",
+            "knownValues": ["critical", "high", "medium", "low", "info"],
+            "description": "Severity level of the finding"
+          },
+          "category": {
+            "type": "string",
+            "knownValues": [
+              "malware-delivery",
+              "data-exfiltration",
+              "prompt-injection",
+              "credential-theft",
+              "reverse-shell",
+              "privilege-escalation",
+              "typosquatting",
+              "supply-chain",
+              "other"
+            ],
+            "description": "Threat category"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Human-readable description of the finding"
+          },
+          "evidence": {
+            "type": "string",
+            "format": "uri",
+            "description": "Link to detailed writeup, advisory, or SARIF report"
+          },
+          "scanner": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Name/identifier of the scanning tool that produced this finding (e.g. 'cisco-skill-scanner', 'snyk', 'manual-review')"
+          },
+          "status": {
+            "type": "string",
+            "knownValues": ["active", "disputed", "withdrawn", "fixed"],
+            "default": "active",
+            "description": "Finding status. Publishers can update: withdrawn (false positive), fixed (skill patched), disputed (contested). Preserves history vs deletion."
+          },
+          "statusNote": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Explanation for status change (e.g. 'False positive — behavior was intentional feature, not exfil')"
+          },
+          "remediation": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Recommended remediation steps (uninstall, rotate keys, etc.)"
+          },
+          "affectedKeys": {
+            "type": "array",
+            "items": { "type": "string", "maxLength": 256 },
+            "maxLength": 50,
+            "description": "Environment variables / secrets the skill had access to that should be rotated"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}
